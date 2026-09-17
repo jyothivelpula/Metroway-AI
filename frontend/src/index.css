@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --color-ink: #14202b;
+  --color-muted: #5a6874;
+  --color-paper: #efe8dc;
+  --color-card: #fffdf8;
+  --color-line: #d8cec0;
+  --color-metro: #0b5f78;
+  --color-metro-deep: #083d4e;
+  --color-signal: #c45c26;
+  --color-lost: #b42318;
+  --color-red-line: #d61f26;
+  --color-blue-line: #0077c8;
+  --color-green-line: #009a44;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(1200px 420px at 10% -10%, rgba(11, 95, 120, 0.12), transparent 55%),
+    radial-gradient(900px 380px at 110% 0%, rgba(196, 92, 38, 0.1), transparent 50%),
+    var(--color-paper);
+  color: var(--color-ink);
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+button,
+a,
+input,
+select {
+  min-height: 44px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-metro);
+  outline-offset: 2px;
+}
+
+html[data-large-text="true"] {
+  font-size: 18px;
+}
+
+html[data-contrast="high"] {
+  --color-paper: #ffffff;
+  --color-card: #ffffff;
+  --color-ink: #000000;
+  --color-muted: #222222;
+  --color-line: #111111;
+}
