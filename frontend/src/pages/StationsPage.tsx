@@ -1,22 +1,24 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { DEMO_STATIONS } from "../data/demo";
 import { LineChip } from "../components/LineChip";
 import { DemoBanner } from "../components/DemoBanner";
 import { PhaseNotice } from "../components/PhaseNotice";
 import { pushRecent } from "../hooks/recentStations";
+import { getStations, stationKey } from "../services/stations";
+import { asMetroLines, type StationSummary } from "../types";
 
 export function StationsPage() {
   const [query, setQuery] = useState("");
   const [line, setLine] = useState<"All" | "Red" | "Blue" | "Green">("All");
+  const [stations, setStations] = useState<StationSummary[]>([]);
 
-  const stations = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return DEMO_STATIONS.filter((s) => {
-      const matchesQuery = !q || s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q);
-      const matchesLine = line === "All" || s.lines.includes(line);
-      return matchesQuery && matchesLine;
-    });
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      void getStations({ q: query.trim() || undefined, line })
+        .then(setStations)
+        .catch(() => setStations([]));
+    }, 200);
+    return () => window.clearTimeout(handle);
   }, [query, line]);
 
   return (
@@ -56,19 +58,19 @@ export function StationsPage() {
         {stations.map((station) => (
           <li key={station.id}>
             <Link
-              to={`/stations/${station.id}`}
-              onClick={() => pushRecent(station.id)}
+              to={`/stations/${stationKey(station)}`}
+              onClick={() => pushRecent(stationKey(station))}
               className="flex items-center justify-between rounded-3xl border border-line bg-card px-4 py-4 no-underline shadow-sm"
             >
               <span>
-                <span className="block text-lg font-semibold">{station.name}</span>
+                <span className="block text-lg font-semibold">{station.station_name}</span>
                 <span className="text-sm text-muted">
-                  {station.code}
-                  {station.interchange ? " · Interchange" : ""}
+                  {station.station_code}
+                  {station.is_interchange ? " · Interchange" : ""}
                 </span>
               </span>
               <span className="flex gap-1">
-                {station.lines.map((l) => (
+                {asMetroLines(station.lines).map((l) => (
                   <LineChip key={l} line={l} />
                 ))}
               </span>
@@ -77,7 +79,7 @@ export function StationsPage() {
         ))}
       </ul>
       <PhaseNotice>
-        Full station records, platforms, gates, and facilities are planned for Phase 2.
+        Station directory for Hyderabad Metro. Indoor layouts are added when verified station data is available.
       </PhaseNotice>
     </div>
   );

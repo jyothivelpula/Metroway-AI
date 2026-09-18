@@ -712,13 +712,13 @@ Examples:
 # 27. Current Development Status
 
 Current Phase:
-Phase 1 — Dashboard & UI
+Phase 3 — Hyderabad Metro Network Map
 
 Status:
-In progress — frontend dashboard, layout, and placeholder screens are implemented. No backend, indoor maps, or route engine yet.
+Demo inter-station network graph and Metro Map API are connected to the existing map page. Indoor maps and route engines are not implemented.
 
 Next Phase:
-Phase 2 — Metro Station Data & Station Directory
+Phase 4 — Indoor Station Maps
 
 
 

@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, DoorOpen, MapPinned, Navigation, Search } from "lucide-react";
 import { DemoBanner } from "../components/DemoBanner";
 import { LineChip } from "../components/LineChip";
 import { PhaseNotice } from "../components/PhaseNotice";
-import { DEMO_STATIONS } from "../data/demo";
 import { pushRecent, readRecent } from "../hooks/recentStations";
+import { getStations, matchesStationKey, searchStations, stationKey } from "../services/stations";
+import { asMetroLines, type StationSummary } from "../types";
 
 const actions = [
   {
@@ -36,15 +37,33 @@ const actions = [
 
 export function HomePage() {
   const [query, setQuery] = useState("");
-  const recentIds = readRecent();
-  const recent = DEMO_STATIONS.filter((s) => recentIds.includes(s.id));
-  const matches = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return DEMO_STATIONS.filter(
-      (s) => s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q),
-    ).slice(0, 5);
+  const [matches, setMatches] = useState<StationSummary[]>([]);
+  const [stations, setStations] = useState<StationSummary[]>([]);
+
+  useEffect(() => {
+    void getStations()
+      .then(setStations)
+      .catch(() => setStations([]));
+  }, []);
+
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setMatches([]);
+      return;
+    }
+    const handle = window.setTimeout(() => {
+      void searchStations(q)
+        .then((results) => setMatches(results.slice(0, 5)))
+        .catch(() => setMatches([]));
+    }, 200);
+    return () => window.clearTimeout(handle);
   }, [query]);
+
+  const recentIds = readRecent();
+  const recent = recentIds
+    .map((id) => stations.find((station) => matchesStationKey(station, id)))
+    .filter((station): station is StationSummary => Boolean(station));
 
   return (
     <div className="space-y-5">
@@ -92,16 +111,16 @@ export function HomePage() {
             {matches.map((station) => (
               <li key={station.id}>
                 <Link
-                  to={`/stations/${station.id}`}
-                  onClick={() => pushRecent(station.id)}
+                  to={`/stations/${stationKey(station)}`}
+                  onClick={() => pushRecent(stationKey(station))}
                   className="flex items-center justify-between rounded-2xl bg-paper px-3 py-3 no-underline"
                 >
                   <span>
-                    <span className="block font-semibold text-ink">{station.name}</span>
-                    <span className="text-sm text-muted">{station.code}</span>
+                    <span className="block font-semibold text-ink">{station.station_name}</span>
+                    <span className="text-sm text-muted">{station.station_code}</span>
                   </span>
                   <span className="flex gap-1">
-                    {station.lines.map((line) => (
+                    {asMetroLines(station.lines).map((line) => (
                       <LineChip key={line} line={line} />
                     ))}
                   </span>
@@ -152,18 +171,18 @@ export function HomePage() {
       <section className="rounded-3xl border border-line bg-card p-4 shadow-sm">
         <h2 className="font-display text-2xl">Recent searches</h2>
         {recent.length === 0 ? (
-          <p className="mt-3 text-sm text-muted">Search a demo station above and it will appear here on this device.</p>
+          <p className="mt-3 text-sm text-muted">Search a station above and it will appear here on this device.</p>
         ) : (
           <ul className="mt-3 divide-y divide-line">
             {recent.map((station) => (
               <li key={station.id}>
                 <Link
-                  to={`/stations/${station.id}`}
+                  to={`/stations/${stationKey(station)}`}
                   className="flex items-center justify-between py-3 no-underline"
                 >
-                  <span className="font-semibold text-ink">{station.name}</span>
+                  <span className="font-semibold text-ink">{station.station_name}</span>
                   <span className="flex gap-1">
-                    {station.lines.map((line) => (
+                    {asMetroLines(station.lines).map((line) => (
                       <LineChip key={line} line={line} />
                     ))}
                   </span>

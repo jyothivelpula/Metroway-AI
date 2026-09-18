@@ -10,3 +10,10 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 *.log
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/metroway.db
+backend/*.db
+

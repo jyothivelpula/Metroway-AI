@@ -1,12 +1,20 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { DEMO_STATIONS } from "../data/demo";
 import { PhaseNotice } from "../components/PhaseNotice";
 import { pushRecent } from "../hooks/recentStations";
+import { getStations } from "../services/stations";
+import type { StationSummary } from "../types";
 
 export function CurrentLocationPage() {
   const [stationId, setStationId] = useState("");
   const [saved, setSaved] = useState(false);
+  const [stations, setStations] = useState<StationSummary[]>([]);
+
+  useEffect(() => {
+    void getStations()
+      .then(setStations)
+      .catch(() => setStations([]));
+  }, []);
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -33,10 +41,10 @@ export function CurrentLocationPage() {
             }}
             className="mt-2 w-full rounded-2xl border border-line bg-paper px-4 py-3"
           >
-            <option value="">Select a demo station</option>
-            {DEMO_STATIONS.map((station) => (
-              <option key={station.id} value={station.id}>
-                {station.name}
+            <option value="">Select a station</option>
+            {stations.map((station) => (
+              <option key={station.id} value={station.alternate_name || station.station_code}>
+                {station.station_name}
               </option>
             ))}
           </select>

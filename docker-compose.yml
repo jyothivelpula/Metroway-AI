@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: metroway
+      POSTGRES_PASSWORD: metroway
+      POSTGRES_DB: metroway
+    ports:
+      - "5432:5432"
+    volumes:
+      - metroway_pg:/var/lib/postgresql/data
+
+volumes:
+  metroway_pg:
