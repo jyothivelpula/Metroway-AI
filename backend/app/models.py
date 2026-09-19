@@ -81,6 +81,7 @@ class Station(Base):
     indoor_nodes: Mapped[list["IndoorNode"]] = relationship(back_populates="station")
     indoor_edges: Mapped[list["IndoorEdge"]] = relationship(back_populates="station")
     map_metadata: Mapped[list["MapMetadata"]] = relationship(back_populates="station")
+    position_markers: Mapped[list["PositionMarker"]] = relationship(back_populates="station")
     outgoing_connections: Mapped[list["StationConnection"]] = relationship(
         back_populates="from_station",
         foreign_keys="StationConnection.from_station_id",
@@ -441,6 +442,36 @@ class MapMetadata(Base):
 
     station: Mapped[Station] = relationship(back_populates="map_metadata")
     level: Mapped[StationLevel] = relationship()
+
+
+class PositionMarker(Base):
+    __tablename__ = "position_markers"
+    __table_args__ = (
+        UniqueConstraint("marker_code", name="uq_position_marker_code"),
+        UniqueConstraint("station_id", "node_id", "marker_type", name="uq_position_marker_node_type"),
+        Index("ix_position_markers_station", "station_id"),
+        Index("ix_position_markers_node", "node_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    station_id: Mapped[str] = mapped_column(ForeignKey("stations.id"), nullable=False)
+    level_id: Mapped[str] = mapped_column(ForeignKey("station_levels.id"), nullable=False)
+    node_id: Mapped[str] = mapped_column(ForeignKey("indoor_nodes.id"), nullable=False)
+    marker_type: Mapped[str] = mapped_column(String(40), nullable=False, default="QR")
+    marker_code: Mapped[str] = mapped_column(String(80), nullable=False)
+    label: Mapped[str] = mapped_column(String(120), nullable=False)
+    status: Mapped[str] = mapped_column(String(40), default="ACTIVE")
+    data_status: Mapped[str] = mapped_column(String(40), default="DEVELOPMENT")
+    verification_status: Mapped[str] = mapped_column(String(40), default="DEVELOPMENT")
+    last_verified_date: Mapped[date | None] = mapped_column(Date)
+    notes: Mapped[str | None] = mapped_column(Text)
+    source_id: Mapped[str | None] = mapped_column(ForeignKey("sources.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    station: Mapped[Station] = relationship(back_populates="position_markers")
+    level: Mapped[StationLevel] = relationship()
+    node: Mapped[IndoorNode] = relationship()
 
 
 class Verification(Base):

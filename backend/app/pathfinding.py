@@ -6,6 +6,8 @@ from math import atan2, degrees, hypot
 from typing import Callable
 from uuid import uuid4
 
+from app.nav_config import SLIGHT_MAX_DEG, STRAIGHT_MAX_DEG
+
 
 class RouteError(Exception):
     def __init__(self, reason: str, message: str, status_code: int = 400):
@@ -169,13 +171,12 @@ def turn_label(prev: GraphNode, current: GraphNode, nxt: GraphNode) -> str | Non
     cross = ax * by - ay * bx
     dot = ax * bx + ay * by
     angle = abs(degrees(atan2(cross, dot)))
-    if angle < 25:
+    if angle < STRAIGHT_MAX_DEG:
         return "STRAIGHT"
-    if angle < 55:
-        return "SLIGHT_LEFT" if cross < 0 else "SLIGHT_RIGHT"
-    if cross < 0:
-        return "LEFT"
-    return "RIGHT"
+    left = cross < 0
+    if angle < SLIGHT_MAX_DEG:
+        return "SLIGHT_LEFT" if left else "SLIGHT_RIGHT"
+    return "LEFT" if left else "RIGHT"
 
 
 def _distance_phrase(distance_m: float | None) -> str | None:
@@ -199,65 +200,95 @@ def instruction_for_edge(
 ) -> dict:
     level_change = origin.level_id != dest.level_id
     action = "GO_STRAIGHT"
+    short = "Go straight"
     distance_phrase = _distance_phrase(edge.distance_m)
     if distance_phrase:
         text = f"Walk straight for {distance_phrase}."
     else:
         text = f"Continue toward {dest.name}."
     connection = edge.connection_type
-    landmark = None
+    landmark = dest.name
+    sign_text = None
 
     if connection == "STAIRS" or (level_change and connection == "STAIRS"):
         action = "TAKE_STAIRS"
+        short = "Take stairs"
         direction = "up" if dest.level_order > origin.level_order else "down"
         text = f"Take the stairs {direction} to the {dest.level_name}."
+        landmark = dest.level_name
     elif connection == "ESCALATOR":
         action = "TAKE_ESCALATOR"
+        short = "Take escalator"
         direction = "up" if dest.level_order > origin.level_order else "down"
         text = f"Take the escalator {direction} to the {dest.level_name}."
+        landmark = dest.level_name
     elif connection == "LIFT":
         action = "TAKE_LIFT"
+        short = "Take lift"
         text = f"Take the lift to the {dest.level_name}."
+        landmark = dest.level_name
     elif connection == "ENTRANCE":
         action = "ENTER"
+        short = "Enter station area"
         text = f"Enter toward {dest.name}."
         if distance_phrase:
             text = f"Enter toward {dest.name}. Walk {distance_phrase}."
     elif connection == "EXIT":
         action = "EXIT"
+        short = "Exit station"
         text = f"Go toward {dest.name} to exit."
     elif connection == "PLATFORM_ACCESS":
         action = "FOLLOW_PLATFORM_SIGN"
-        text = f"Use platform access toward {dest.name}."
+        short = "Follow platform signs"
+        text = f"Follow signs toward {dest.name}."
+        sign_text = dest.name
     elif connection == "INTERCHANGE":
         action = "FOLLOW_LINE_SIGN"
-        text = f"Walk to the interchange at {dest.name}."
+        short = "Follow line signs"
+        text = f"Follow signs toward {dest.name}."
+        sign_text = dest.name
     elif previous is not None and origin.level_id == dest.level_id:
         turn = turn_label(previous, origin, dest)
         if turn == "LEFT":
             action = "TURN_LEFT"
-            text = f"Turn left toward {dest.name}."
+            short = "Turn left"
+            text = f"Turn left after the {origin.name}."
+            landmark = origin.name
         elif turn == "RIGHT":
             action = "TURN_RIGHT"
-            text = f"Turn right toward {dest.name}."
+            short = "Turn right"
+            text = f"Turn right after the {origin.name}."
+            landmark = origin.name
         elif turn == "SLIGHT_LEFT":
             action = "SLIGHT_LEFT"
-            text = f"Bear left toward {dest.name}."
+            short = "Slight left"
+            text = f"Bear left after the {origin.name}."
+            landmark = origin.name
         elif turn == "SLIGHT_RIGHT":
             action = "SLIGHT_RIGHT"
-            text = f"Bear right toward {dest.name}."
+            short = "Slight right"
+            text = f"Bear right after the {origin.name}."
+            landmark = origin.name
         elif turn == "STRAIGHT":
             action = "GO_STRAIGHT"
-            text = f"Walk straight for {distance_phrase}." if distance_phrase else "Walk straight."
+            short = "Go straight"
+            if distance_phrase:
+                text = f"Walk straight for {distance_phrase}."
+            else:
+                text = f"Continue straight toward {dest.name}."
+            landmark = dest.name
 
     if level_change and action not in {"TAKE_STAIRS", "TAKE_ESCALATOR", "TAKE_LIFT"}:
         action = "GO_UP" if dest.level_order > origin.level_order else "GO_DOWN"
+        short = "Go upstairs" if dest.level_order > origin.level_order else "Go downstairs"
         text = f"Go to the {dest.level_name} toward {dest.name}."
+        landmark = dest.level_name
 
     return {
         "action": action,
         "instruction_type": action,
         "instruction_text": text,
+        "short_instruction": short,
         "text": text,
         "from_node_id": origin.id,
         "to_node_id": dest.id,
@@ -268,7 +299,7 @@ def instruction_for_edge(
         "distance_m": edge.distance_m,
         "estimated_time_sec": edge.estimated_time_sec,
         "landmark": landmark,
-        "sign_text": None,
+        "sign_text": sign_text,
         "voice_instruction": voice_instruction_from(text),
     }
 
@@ -284,6 +315,7 @@ def _annotate_steps(steps: list[dict]) -> list[dict]:
         step.setdefault("estimated_time_sec", None)
         step.setdefault("landmark", None)
         step.setdefault("sign_text", None)
+        step.setdefault("short_instruction", None)
         step.setdefault("voice_instruction", voice_instruction_from(step.get("instruction_text") or step.get("text") or ""))
     return steps
 
@@ -297,6 +329,7 @@ def build_steps(nodes: list[GraphNode], edges: list[GraphEdge]) -> list[dict]:
             "action": "START",
             "instruction_type": "START",
             "instruction_text": "Start your navigation here.",
+            "short_instruction": "Start here",
             "text": f"Start at {start.name}.",
             "from_node_id": None,
             "to_node_id": start.id,
@@ -322,6 +355,7 @@ def build_steps(nodes: list[GraphNode], edges: list[GraphEdge]) -> list[dict]:
             "action": "ARRIVE",
             "instruction_type": "ARRIVE",
             "instruction_text": f"You have arrived at {finish.name}.",
+            "short_instruction": "You have arrived",
             "text": f"Arrive at {finish.name}.",
             "from_node_id": finish.id if len(nodes) == 1 else nodes[-2].id,
             "to_node_id": finish.id,
@@ -340,10 +374,24 @@ def build_steps(nodes: list[GraphNode], edges: list[GraphEdge]) -> list[dict]:
 
 
 def check_user_on_route(route_node_ids: list[str], current_node_id: str | None) -> str:
+    return match_position_to_route(current_node_id, route_node_ids)
+
+
+def match_position_to_route(
+    current_node_id: str | None,
+    route_node_ids: list[str],
+    *,
+    destination_node_id: str | None = None,
+    neighbor_node_ids: set[str] | None = None,
+) -> str:
     if not current_node_id:
         return "UNKNOWN"
+    if destination_node_id and current_node_id == destination_node_id:
+        return "DESTINATION"
     if current_node_id in route_node_ids:
         return "ON_ROUTE"
+    if neighbor_node_ids and current_node_id in neighbor_node_ids:
+        return "NEAR_ROUTE"
     return "OFF_ROUTE"
 
 

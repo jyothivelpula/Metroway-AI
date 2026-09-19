@@ -32,6 +32,10 @@ body {
   color: var(--color-ink);
 }
 
+.bg-card {
+  background: var(--color-card);
+}
+
 #root {
   min-height: 100dvh;
 }
@@ -48,10 +52,6 @@ select {
   outline-offset: 2px;
 }
 
-html[data-large-text="true"] {
-  font-size: 18px;
-}
-
 html[data-contrast="high"] {
   --color-paper: #ffffff;
   --color-card: #ffffff;
@@ -59,3 +59,65 @@ html[data-contrast="high"] {
   --color-muted: #222222;
   --color-line: #111111;
 }
+
+html[data-contrast="high"] .bg-card {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: #111111;
+  box-shadow: none;
+}
+
+.mw-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+}
+
+.mw-map .maplibregl-ctrl-top-right {
+  display: none;
+}
+
+.mw-station-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  background: #0b5f78;
+  box-shadow: 0 0 0 2px rgba(11, 95, 120, 0.25);
+  cursor: pointer;
+}
+
+.mw-station-marker-interchange {
+  background: #b42318;
+  box-shadow: 0 0 0 2px rgba(180, 35, 24, 0.25);
+}
+
+.mw-popup-title {
+  margin: 0;
+  font-weight: 700;
+}
+
+.mw-popup-meta {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #5a6874;
+}
+
+.mw-popup-action {
+  margin-top: 8px;
+  min-height: 40px;
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  background: #0b5f78;
+  color: #fff;
+  font-weight: 600;
+}
+
+.maplibregl-user-location-dot,
+.maplibregl-user-location-accuracy-circle {
+  background-color: #0077c8;
+}
+

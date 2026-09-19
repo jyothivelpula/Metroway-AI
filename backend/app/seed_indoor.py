@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import IndoorEdge, IndoorNode, MapMetadata, Station, StationLevel
+from app.models import IndoorEdge, IndoorNode, MapMetadata, PositionMarker, Station, StationLevel
 
 # Schematic Ameerpet layout for architecture testing only. Not a surveyed floor plan.
 # Coordinates are normalized 0–100. Distances are not stored as real metres.
@@ -221,3 +221,36 @@ def seed_development_indoor_maps(db: Session, source_id: str | None = None) -> N
         if station.station_code == "AMP":
             continue
         _seed_station_graph(db, station, MINIMAL_NODES, MINIMAL_EDGES, source_id, prune=True)
+    seed_position_markers(db, source_id)
+
+
+def seed_position_markers(db: Session, source_id: str | None = None) -> None:
+    nodes = db.scalars(select(IndoorNode)).all()
+    kept: set[str] = set()
+    for node in nodes:
+        station = db.get(Station, node.station_id)
+        if station is None:
+            continue
+        code = f"MW-{station.station_code}-{node.node_code}"
+        row = _upsert(
+            db,
+            PositionMarker,
+            {"marker_code": code},
+            {
+                "station_id": station.id,
+                "level_id": node.level_id,
+                "node_id": node.id,
+                "marker_type": "QR",
+                "label": node.name,
+                "status": "ACTIVE",
+                "data_status": "DEVELOPMENT",
+                "verification_status": "DEVELOPMENT",
+                "notes": "Development QR marker mapped to an indoor node. Not a physical station installation.",
+                "source_id": source_id,
+            },
+        )
+        kept.add(row.id)
+    for marker in db.scalars(select(PositionMarker)).all():
+        if marker.id not in kept and not _protected(marker):
+            db.delete(marker)
+    db.flush()

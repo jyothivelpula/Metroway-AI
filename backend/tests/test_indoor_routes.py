@@ -267,6 +267,34 @@ def test_steps_have_indexes_and_no_invented_distance(client):
     assert check_user_on_route(ids, "missing") == "OFF_ROUTE"
 
 
+def test_turn_label_uses_route_geometry():
+    from app.pathfinding import GraphNode, turn_label
+
+    def node(code: str, x: float, y: float) -> GraphNode:
+        return GraphNode(
+            id=code,
+            station_id="s",
+            level_id="l",
+            level_code="STREET",
+            level_name="Street",
+            level_order=1,
+            node_code=code,
+            node_type="WAYPOINT",
+            name=code,
+            x=x,
+            y=y,
+            accessible=True,
+            data_status="DEVELOPMENT",
+        )
+
+    prev, current, nxt = node("a", 0, 0), node("b", 10, 0), node("c", 10, -10)
+    assert turn_label(prev, current, nxt) == "LEFT"
+    nxt_right = node("d", 10, 10)
+    assert turn_label(prev, current, nxt_right) == "RIGHT"
+    nxt_straight = node("e", 20, 0)
+    assert turn_label(prev, current, nxt_straight) == "STRAIGHT"
+
+
 def test_turn_by_turn_stations(client):
     cases = (
         ("begumpet", "ST-ENT", "CC-HALL"),
@@ -292,6 +320,22 @@ def test_turn_by_turn_stations(client):
         if station_key == "ameerpet":
             levels = {node["level"] for node in body["nodes"]}
             assert {"STREET", "CONCOURSE", "PLATFORM"} <= levels
+            actions = {step["action"] for step in body["steps"]}
+            assert "START" in actions and "ARRIVE" in actions
+            assert actions & {
+                "GO_STRAIGHT",
+                "TURN_LEFT",
+                "TURN_RIGHT",
+                "SLIGHT_LEFT",
+                "SLIGHT_RIGHT",
+                "TAKE_STAIRS",
+                "TAKE_ESCALATOR",
+                "TAKE_LIFT",
+                "GO_UP",
+                "GO_DOWN",
+                "ENTER",
+                "FOLLOW_PLATFORM_SIGN",
+            }
 
 
 def test_voice_instruction_uses_meters_only_with_distance():

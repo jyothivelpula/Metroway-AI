@@ -61,7 +61,10 @@ export function CurrentLocationPage() {
           </Link>
         </p>
       )}
-      <PhaseNotice>QR markers and indoor positioning are planned for Phase 7.</PhaseNotice>
+      <PhaseNotice>
+        Indoor QR and manual positioning are on the Navigate screen after you prepare a route. GPS is only an
+        approximate outdoor location.
+      </PhaseNotice>
     </div>
   );
 }

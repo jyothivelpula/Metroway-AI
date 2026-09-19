@@ -11,7 +11,7 @@ const links = [
 
 export function Header() {
   return (
-    <header className="border-b border-line bg-card/90 backdrop-blur">
+    <header className="border-b border-line bg-card">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
         <NavLink to="/" className="flex items-center gap-3 no-underline">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-metro text-sm font-bold tracking-tight text-white">

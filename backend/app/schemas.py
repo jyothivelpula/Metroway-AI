@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 
 class ORMModel(BaseModel):
@@ -380,6 +380,7 @@ class IndoorRouteStepOut(ORMModel):
     landmark: str | None = None
     sign_text: str | None = None
     voice_instruction: str | None = None
+    short_instruction: str | None = None
 
 
 class IndoorRouteOut(ORMModel):
@@ -394,4 +395,69 @@ class IndoorRouteOut(ORMModel):
     nodes: list[IndoorRouteNodeOut]
     edges: list[IndoorRouteEdgeOut]
     steps: list[IndoorRouteStepOut]
+
+
+class PositionResolveRequest(ORMModel):
+    marker_code: str | None = Field(default=None, validation_alias=AliasChoices("marker_code", "markerCode"))
+    payload: dict | None = None
+
+
+class PositionStationRef(ORMModel):
+    id: str
+    name: str
+    station_code: str | None = None
+
+
+class PositionLevelRef(ORMModel):
+    id: str
+    code: str
+    name: str
+
+
+class PositionNodeRef(ORMModel):
+    id: str
+    name: str
+    node_code: str
+    node_type: str
+
+
+class PositionMarkerOut(ORMModel):
+    id: str
+    marker_code: str
+    marker_type: str
+    label: str
+    status: str
+    station: PositionStationRef
+    level: PositionLevelRef | None = None
+    node: PositionNodeRef | None = None
+
+
+class PositionMarkerStationOut(ORMModel):
+    id: str
+    name: str
+
+
+class PositionMarkerListOut(ORMModel):
+    station: PositionMarkerStationOut
+    markers: list[PositionMarkerOut]
+
+
+class PositionResolveOut(ORMModel):
+    valid: bool
+    reason: str | None = None
+    source: str = "QR_POSITION"
+    stationId: str | None = None
+    stationName: str | None = None
+    stationCode: str | None = None
+    levelId: str | None = None
+    levelCode: str | None = None
+    levelName: str | None = None
+    nodeId: str | None = None
+    nodeName: str | None = None
+    nodeCode: str | None = None
+    markerId: str | None = None
+    confidence: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    accuracy: float | None = None
 

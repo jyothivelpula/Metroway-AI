@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, DoorOpen, MapPinned, Navigation, Search } from "lucide-react";
+import { ArrowRight, DoorOpen, MapPinned, Navigation, Search, TrainFront } from "lucide-react";
 import { DemoBanner } from "../components/DemoBanner";
 import { LineChip } from "../components/LineChip";
 import { PhaseNotice } from "../components/PhaseNotice";
@@ -67,22 +67,29 @@ export function HomePage() {
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-3xl bg-metro-deep text-white shadow-sm">
-        <div className="grid gap-6 p-6 md:grid-cols-[1.4fr_1fr] md:items-end">
-          <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-white/70">Hyderabad Metro</p>
-            <h1 className="mt-2 font-display text-4xl leading-tight md:text-5xl">
-              Don&apos;t just know your platform.
-              <span className="block text-white/85">Know your way.</span>
-            </h1>
-            <p className="mt-4 max-w-xl text-base text-white/80">
-              Indoor wayfinding for passengers already inside a station — platforms, gates, lifts,
-              and facilities.
-            </p>
-          </div>
+      <section className="relative overflow-hidden rounded-3xl border border-line bg-card p-6 shadow-sm md:p-10">
+        <img
+          src="/hero-metro.jpg"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[78%_42%] opacity-[0.28]"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-card via-card/80 to-card/40" />
+        <div className="relative max-w-xl">
+          <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-metro">
+            <TrainFront className="h-4 w-4" aria-hidden="true" />
+            Hyderabad Metro
+          </p>
+          <h1 className="mt-3 font-display text-4xl leading-tight text-ink md:text-5xl">
+            You know where you&apos;re going.
+            <span className="block text-metro-deep">We&apos;ll show you the way.</span>
+          </h1>
+          <p className="mt-4 max-w-md text-base leading-relaxed text-muted">
+            Don&apos;t just know your platform. Know your way — from the entrance to the gate,
+            lift, or concourse, while you are still in the station.
+          </p>
           <Link
             to="/im-lost"
-            className="inline-flex items-center justify-between rounded-2xl bg-lost px-4 py-3 font-semibold text-white no-underline"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-lost px-6 py-3 font-semibold text-white no-underline transition duration-200 hover:brightness-110 sm:w-auto sm:justify-start"
           >
             I&apos;m Lost
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -153,7 +160,7 @@ export function HomePage() {
       <section className="grid gap-3 md:grid-cols-2">
         <article className="rounded-3xl border border-line bg-card p-4 shadow-sm">
           <h2 className="font-display text-2xl">Nearby station</h2>
-          <p className="mt-1 text-sm text-muted">Choose a station manually. GPS arrives in Phase 7.</p>
+          <p className="mt-1 text-sm text-muted">Choose a station, then use indoor positioning on Navigate.</p>
           <Link
             to="/location"
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-metro px-4 py-2 font-semibold text-white no-underline"

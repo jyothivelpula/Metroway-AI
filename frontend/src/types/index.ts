@@ -220,6 +220,7 @@ export type IndoorRouteStep = {
   landmark: string | null;
   sign_text: string | null;
   voice_instruction?: string | null;
+  short_instruction?: string | null;
 };
 
 export type IndoorRoute = {

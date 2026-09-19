@@ -1,4 +1,5 @@
 import type { IndoorRoute, IndoorRouteStep, NavigationMode } from "../types";
+import type { PositionSource } from "../positioning/types";
 
 export type RouteStatus = "ON_ROUTE" | "OFF_ROUTE" | "UNKNOWN";
 
@@ -9,9 +10,13 @@ export type IndoorNavigationState = {
   totalSteps: number;
   route: IndoorRoute | null;
   currentNodeId: string | null;
+  currentUserNodeId: string | null;
   destinationNodeId: string | null;
   currentLevel: string | null;
   completed: boolean;
+  positionSource: PositionSource | null;
+  offRoute: boolean;
+  positionUpdatedAt: string | null;
 };
 
 export function isUserOnRoute(currentNodeId: string | null | undefined, routeNodeIds: string[]): RouteStatus {
@@ -36,6 +41,13 @@ export function createNavigationState(
   route: IndoorRoute | null,
   currentStepIndex = 0,
   mode: NavigationMode = "MANUAL_STEP",
+  extras?: {
+    currentUserNodeId?: string | null;
+    positionSource?: PositionSource | null;
+    offRoute?: boolean;
+    positionUpdatedAt?: string | null;
+    currentLevel?: string | null;
+  },
 ): IndoorNavigationState {
   if (!route?.route_found) {
     return {
@@ -45,24 +57,34 @@ export function createNavigationState(
       totalSteps: 0,
       route: null,
       currentNodeId: null,
+      currentUserNodeId: extras?.currentUserNodeId ?? null,
       destinationNodeId: null,
-      currentLevel: null,
+      currentLevel: extras?.currentLevel ?? null,
       completed: false,
+      positionSource: extras?.positionSource ?? null,
+      offRoute: false,
+      positionUpdatedAt: extras?.positionUpdatedAt ?? null,
     };
   }
   const total = route.steps.length;
   const index = Math.min(Math.max(currentStepIndex, 0), Math.max(total - 1, 0));
   const step = route.steps[index];
+  const liveNode = extras?.currentUserNodeId ?? null;
+  const currentNodeId = mode === "LIVE_POSITION" && liveNode ? liveNode : currentNodeFromStep(step);
   return {
     active: true,
     mode,
     currentStepIndex: index,
     totalSteps: total,
     route,
-    currentNodeId: currentNodeFromStep(step),
+    currentNodeId,
+    currentUserNodeId: liveNode,
     destinationNodeId: route.destination.node_id,
-    currentLevel: step?.level ?? route.nodes[0]?.level ?? null,
-    completed: Boolean(step && (step.action === "ARRIVE" || index >= total - 1)),
+    currentLevel: extras?.currentLevel ?? step?.level ?? route.nodes[0]?.level ?? null,
+    completed: Boolean(step && (step.action === "ARRIVE" || index >= total - 1 || liveNode === route.destination.node_id)),
+    positionSource: extras?.positionSource ?? null,
+    offRoute: extras?.offRoute ?? false,
+    positionUpdatedAt: extras?.positionUpdatedAt ?? null,
   };
 }
 
