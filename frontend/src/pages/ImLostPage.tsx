@@ -50,24 +50,24 @@ export function ImLostPage() {
       </p>
       <div className="grid gap-3 md:grid-cols-3">
         <article className="rounded-3xl border border-line bg-card p-4 shadow-sm">
-          <Camera className="h-6 w-6 text-lost" aria-hidden="true" />
+          <Camera className="h-6 w-6 text-assist" aria-hidden="true" />
           <h2 className="mt-3 text-lg font-semibold">Photo of a sign</h2>
           <p className="mt-2 text-sm text-muted">Vision and OCR will read station signs in Phase 8.</p>
         </article>
         <article className="rounded-3xl border border-line bg-card p-4 shadow-sm">
-          <QrCode className="h-6 w-6 text-lost" aria-hidden="true" />
+          <QrCode className="h-6 w-6 text-assist" aria-hidden="true" />
           <h2 className="mt-3 text-lg font-semibold">Scan a QR marker</h2>
           <p className="mt-2 text-sm text-muted">Uses the same Phase 7 QR positioning as live navigation.</p>
         </article>
         <article className="rounded-3xl border border-line bg-card p-4 shadow-sm">
-          <MapPin className="h-6 w-6 text-lost" aria-hidden="true" />
+          <MapPin className="h-6 w-6 text-assist" aria-hidden="true" />
           <h2 className="mt-3 text-lg font-semibold">Choose manually</h2>
           <p className="mt-2 text-sm text-muted">Pick a station, then set your indoor position on the Navigate screen.</p>
         </article>
       </div>
       {message ? <p className="text-sm text-muted">{message}</p> : null}
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled className="rounded-full bg-lost px-4 py-2 font-semibold text-white opacity-60">
+        <button type="button" disabled className="rounded-full bg-assist px-4 py-2 font-semibold text-white opacity-60">
           Open camera (Phase 8)
         </button>
         <button

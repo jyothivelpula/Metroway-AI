@@ -3,18 +3,27 @@
 @theme {
   --font-sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
-  --color-ink: #14202b;
-  --color-muted: #5a6874;
-  --color-paper: #efe8dc;
-  --color-card: #fffdf8;
-  --color-line: #d8cec0;
-  --color-metro: #0b5f78;
-  --color-metro-deep: #083d4e;
+  --color-ink: #102a3a;
+  --color-muted: #647887;
+  --color-paper: #f5f0e7;
+  --color-card: #fffdf9;
+  --color-surface-2: #eee7da;
+  --color-line: #ddd5c8;
+  --color-metro: #086b82;
+  --color-metro-deep: #064e5f;
+  --color-metro-light: #dceff2;
   --color-signal: #c45c26;
-  --color-lost: #b42318;
+  --color-lost: #c92a20;
+  --color-assist: #d47842;
   --color-red-line: #d61f26;
   --color-blue-line: #0077c8;
   --color-green-line: #009a44;
+  --radius-card: 1.25rem;
+  --radius-control: 0.75rem;
+  --shadow-card: 0 1px 2px rgb(16 42 58 / 0.06), 0 8px 20px rgb(16 42 58 / 0.04);
+  --spacing-page: 1.25rem;
+  --spacing-section: 1.25rem;
+  --spacing-card: 1.25rem;
 }
 
 html {
@@ -25,10 +34,7 @@ body {
   margin: 0;
   min-height: 100dvh;
   font-family: var(--font-sans);
-  background:
-    radial-gradient(1200px 420px at 10% -10%, rgba(11, 95, 120, 0.12), transparent 55%),
-    radial-gradient(900px 380px at 110% 0%, rgba(196, 92, 38, 0.1), transparent 50%),
-    var(--color-paper);
+  background: var(--color-paper);
   color: var(--color-ink);
 }
 
@@ -55,17 +61,187 @@ select {
 html[data-contrast="high"] {
   --color-paper: #ffffff;
   --color-card: #ffffff;
+  --color-surface-2: #f3f3f3;
+  --color-metro-light: #e8e8e8;
   --color-ink: #000000;
   --color-muted: #222222;
   --color-line: #111111;
 }
 
-html[data-contrast="high"] .bg-card {
+html[data-contrast="high"] .bg-card,
+html[data-contrast="high"] .mw-card {
   background: #ffffff;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border-color: #111111;
   box-shadow: none;
+}
+
+html[data-large-text="true"] {
+  font-size: 112.5%;
+}
+
+.mw-card {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card);
+}
+
+.mw-btn-primary,
+.mw-btn-secondary,
+.mw-btn-danger,
+.mw-btn-assist {
+  display: inline-flex;
+  min-height: 44px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  padding: 0.7rem 1.15rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.mw-btn-primary {
+  background: var(--color-metro);
+  color: #ffffff;
+}
+
+.mw-btn-secondary {
+  border-color: var(--color-line);
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+.mw-btn-danger {
+  background: var(--color-lost);
+  color: #ffffff;
+}
+
+.mw-btn-assist {
+  background: var(--color-assist);
+  color: #ffffff;
+}
+
+.mw-btn-primary:disabled,
+.mw-btn-secondary:disabled,
+.mw-btn-danger:disabled,
+.mw-btn-assist:disabled {
+  opacity: 0.45;
+}
+
+.mw-hero-photo {
+  filter: brightness(1.14) contrast(1.18) saturate(1.06);
+}
+
+.mw-hero-overlay {
+  background: linear-gradient(
+    90deg,
+    rgb(6 78 95 / 0.94) 0%,
+    rgb(6 78 95 / 0.82) 34%,
+    rgb(6 78 95 / 0.28) 58%,
+    rgb(6 78 95 / 0) 78%
+  );
+}
+
+.mw-icon-btn {
+  display: grid;
+  height: 44px;
+  width: 44px;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-card);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-card);
+}
+
+.mw-desktop-nav {
+  display: none;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.mw-mobile-menu-btn {
+  display: grid;
+  height: 40px;
+  width: 40px;
+  min-height: 40px;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-card);
+  color: var(--color-ink);
+}
+
+.mw-mobile-nav {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .mw-desktop-nav {
+    display: flex;
+  }
+
+  .mw-mobile-menu-btn,
+  .mw-mobile-nav {
+    display: none !important;
+  }
+}
+
+.mw-input {
+  width: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  padding: 0.7rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+
+.mw-input-on-card {
+  background: var(--color-card);
+}
+
+.mw-input-with-icon {
+  padding-left: 2.75rem;
+}
+
+.mw-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.mw-pill-active {
+  background: var(--color-metro);
+  color: #ffffff;
+}
+
+.mw-tab {
+  border-radius: 999px;
+  background: var(--color-paper);
+  padding: 0.45rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.mw-tab-active {
+  background: var(--color-metro);
+  color: #ffffff;
 }
 
 .mw-map {
@@ -84,14 +260,14 @@ html[data-contrast="high"] .bg-card {
   height: 18px;
   border-radius: 999px;
   border: 2px solid #fff;
-  background: #0b5f78;
-  box-shadow: 0 0 0 2px rgba(11, 95, 120, 0.25);
+  background: #086b82;
+  box-shadow: 0 0 0 2px rgba(8, 107, 130, 0.25);
   cursor: pointer;
 }
 
 .mw-station-marker-interchange {
-  background: #b42318;
-  box-shadow: 0 0 0 2px rgba(180, 35, 24, 0.25);
+  background: #c92a20;
+  box-shadow: 0 0 0 2px rgba(201, 42, 32, 0.25);
 }
 
 .mw-popup-title {
@@ -102,7 +278,7 @@ html[data-contrast="high"] .bg-card {
 .mw-popup-meta {
   margin: 4px 0 0;
   font-size: 13px;
-  color: #5a6874;
+  color: #647887;
 }
 
 .mw-popup-action {
@@ -110,8 +286,8 @@ html[data-contrast="high"] .bg-card {
   min-height: 40px;
   width: 100%;
   border: 0;
-  border-radius: 999px;
-  background: #0b5f78;
+  border-radius: 0.75rem;
+  background: #086b82;
   color: #fff;
   font-weight: 600;
 }
@@ -120,4 +296,3 @@ html[data-contrast="high"] .bg-card {
 .maplibregl-user-location-accuracy-circle {
   background-color: #0077c8;
 }
-

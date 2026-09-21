@@ -12,7 +12,7 @@ export function AppLayout() {
         Skip to content
       </a>
       <Header />
-      <main id="main" className="mx-auto max-w-5xl px-4 pb-24 pt-5 md:pb-10">
+      <main id="main" className="mx-auto max-w-5xl px-4 pb-24 pt-5 lg:pb-10">
         <Outlet />
       </main>
       <BottomNav />
