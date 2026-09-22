@@ -3,6 +3,7 @@ export type PositionSource =
   | "GPS_POSITION"
   | "MANUAL_POSITION"
   | "SIMULATION_POSITION"
+  | "VISION_POSITION"
   | "BLE_POSITION"
   | "UWB_POSITION";
 

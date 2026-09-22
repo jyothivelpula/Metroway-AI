@@ -117,9 +117,13 @@ export function NavigationPage() {
         setNodes(payload.nodes);
         setEdges(payload.edges);
         setMapReady(true);
+        const pending = pendingRef.current;
+        const pendingNode = pending?.nodeId
+          ? payload.nodes.find((node) => node.id === pending.nodeId)
+          : undefined;
         const entrance = payload.nodes.find((node) => node.node_type === "ENTRANCE");
         const concourse = payload.nodes.find((node) => node.node_type === "CONCOURSE");
-        setOrigin(entrance?.id ?? payload.nodes[0]?.id ?? "");
+        setOrigin(pendingNode?.id ?? entrance?.id ?? payload.nodes[0]?.id ?? "");
         setDestination(concourse?.id ?? payload.nodes.at(-1)?.id ?? "");
         setRoute(null);
         setError("");
@@ -161,7 +165,7 @@ export function NavigationPage() {
     seedNodeRef.current = null;
     const node = nodes.find((item) => item.id === seedId);
     if (node) {
-      applyNode(node, pendingRef.current ? "QR_POSITION" : "SIMULATION_POSITION");
+      applyNode(node, pendingRef.current?.source ?? "SIMULATION_POSITION");
       if (node.x != null && node.y != null) setYouXY({ x: node.x, y: node.y });
       setTravelFromId(node.id);
       setTravelToId(node.id);

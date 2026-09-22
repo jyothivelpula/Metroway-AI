@@ -15,6 +15,7 @@ from app.routers_network import router as network_router
 from app.routers_indoor import router as indoor_router
 from app.routers_routes import router as routes_router
 from app.routers_position import router as position_router
+from app.routers_im_lost import router as im_lost_router
 from app.seed import seed_demo_data
 from app.seed_indoor import seed_position_markers
 from app.seed_network import ensure_network_columns
@@ -51,6 +52,7 @@ app.include_router(network_router)
 app.include_router(indoor_router)
 app.include_router(routes_router)
 app.include_router(position_router)
+app.include_router(im_lost_router)
 
 
 @app.exception_handler(SQLAlchemyError)
